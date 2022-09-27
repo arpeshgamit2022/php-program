@@ -11,107 +11,102 @@
 
     if (isset( $_POST['submit'] ) )
     {
-        //firstname Empty Validation
-        if ( empty ( $_POST['firstname'] ) )
+        //Remove slashes, whitespaces and store data
+        $firstName = stripslashes( trim($_POST['firstname']) );
+        $lastName = stripslashes( trim($_POST['lastname']) );
+        $email = stripslashes( trim($_POST['email']) );
+        $phone = stripslashes( trim($_POST['phone']) );
+        $gender = $_POST['gender'];
+        $birthdate = $_POST['birthdate'];
+
+        //Check firstname empty or not Validation and store error message
+        if ( empty ( $firstName ) )
         {
-            //Store error message in array
-            $validateErrors['firstname_error'] = "Firstname is required";
-        }
-        else
-        {
-            //Remove whitespaces, slashes and store data
-            $fname = stripslashes( trim( $_POST['firstname'] ) );
-            //Check if firstname is well-formed
-            if ( !preg_match("/(^[^s]|\s)/i",$fname) ) 
-            {
-                $validateErrors['firstname_error'] = "Please enter valid name";
-            }
+            $validateErrors['firstnameError'] = "Firstname is required";
         }
 
-        //Lastname Empty Validation
+        //Check Lastname empty or not Validation and store error message
         if ( empty ( $_POST['lastname'] ) )
         {
-            // Store error message in array
-            $validateErrors['lastname_error'] = "Lastname is required";
-        }
-        else
-        {
-            //Remove whitespaces, slashes and store data
-            $lname = stripslashes( trim( $_POST['lastname'] ) );
+            $validateErrors['lastnameError'] = "Lastname is required";
         }
 
-        //Email Empty Validation
+        //Check email empty or not Validation and store error message
         if ( empty ( $_POST['email'] ) )
         {
-            //Store error message
-            $validateErrors['email_error'] = "Email is required";
+            $validateErrors['emailError'] = "Email is required";
         }
         else
         {
-            //Remove whitespaces, slashes and store data in a variable
-            $email = stripslashes( trim( $_POST['email'] ) );
-            
-            //Check if email is well-formed
+            //Check if email is well-formed and store error message
             if(!preg_match("/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix", $email))
             {
-                //Store error message
-                $validateErrors['email_error']="Please enter correct email";
+                $validateErrors['emailError']="Please enter correct email";
             }
         }
 
-        //Phone Empty Validation
+        //Check phone empty or not Validation and store error message
         if ( empty ( $_POST['phone'] ) )
         {
-            //Store error message
-            $validateErrors['phone_error'] = "Phone is required";
+            $validateErrors['phoneError'] = "Phone is required";
         }
         else
         {
-            //Remove whitespaces, slashes and store data in a variable
-            $phone = stripslashes( trim( $_POST['phone'] ) );
-            
+            //Check if phone is well-formed and store error message
             if ( !preg_match('/^[0-9]{10}+$/', $phone) )
             {
-                //store error message
-                $validateErrors['phone_error']="Please enter correct phone";
+                $validateErrors['phoneError']="Please enter correct phone";
             }
         }
 
-        //Gender Empty Validation
+        //Check gender empty or not Validation and check set or not
         if ( empty ( $_POST['gender'] ) || !isset ( $_POST['gender'] ) )
         {
-            //store error message
-            $validateErrors['gender_error'] = "Gender is required";
+            $validateErrors['genderError'] = "Gender is required";
         }
-        else
-        {
-            //Store data in variable
-            $gender = $_POST['gender'];
-        }
-        //Birthdate Empty Validation
+        
+        //Check phone empty or not Validation and store error message
         if ( empty ( $_POST['birthdate'] ) )
         {
-            //Store error message
-            $validateErrors['birthdate_error'] = "Birthdate is required";
+            $validateErrors['birthdateError'] = "Birthdate is required";
         }
         else
         {
-            $birthdate = trim( $_POST['birthdate'] );
-            //Convert birthdate in dd/mm/yy format
-            $result=explode('-',$birthdate);
-            $date=$result[2];
-            $month=$result[1];
-            $year=$result[0];
-            $userDate=$date.'-'.$month.'-'.$year;
-            // echo $userDate;
-            // $currentDate = new DateTime('today');
-            // // echo $currentDate;
-            // $interval = $currentDate->diff($userDate);
-            // $myage = $interval->y;
+            // $userDate = date_create ("d-m-Y", strtotime($birthdate) );  
+            $d='31';
+            $m='11';
+            $y='05';
 
-            // if ( $myage >= 18 )
+            If(!checkdate($d,$m,$y))
+            {
+                $validateErrors['birthdateError'] = "Birthdate is invalid";
+            }
+
+            //Convert birthdate in d/m/Y format
+            // $userDate = date_create ("d-m-Y", strtotime($birthdate) );  
+            // // echo $userDate;
+            // echo gettype($userDate)."\n";
+
+            // $d = DateTime::createFromFormat($birthdate);
+            // echo $d;
+            // $d && $d->format('d-m-y') === $birthdate;
+        
+            // $currentDate = date_create("d-m-Y");
+
+            // // echo $currentDate;es
+            // echo gettype($currentDate)."\n";
+            // // // echo $currentDate;
+            // $result = $currentDate->diff($userDate);
+
+            // echo $result->format('%y');
+
+            // $interval = date_diff($currentDate, $userDate);
+            // echo $interval->format("%y");
+
+            // $dateofBirth = $interval->y;
+            // if ( $dateofBirth >= 18 )
             // {
-            //     $validateErrors['birthdate_error'] = "Please enter DOB above 18 Years";
+            //     $validateErrors['birthdateError'] = "Please enter DOB above 18 Years";
             // }
         }
         //Qualification Empty Validation
@@ -176,10 +171,10 @@
         //If not empty then store in session
         if(!empty($validateErrors))
         {
-            $_SESSION['errors_data'] = $validateErrors;
+            $_SESSION['errorsData'] = $validateErrors;
 
-            $_SESSION['firstname'] = $fname;
-            $_SESSION['lastname'] = $lname;
+            $_SESSION['firstname'] = $firstName;
+            $_SESSION['lastname'] = $lastName;
             $_SESSION['email'] = $email;
             $_SESSION['phone'] = $phone;
             $_SESSION['gender'] = $gender;
@@ -195,7 +190,7 @@
             //Insert data in the database using insert query
             $insertQuery = "INSERT INTO emp (firstname, lastname, email, phone, gender, birthdate, qualification, photo, description) VALUES (?,?,?,?,?,?,?,?,?)";
             $stmt= $pdo->prepare($insertQuery);
-            $stmt->execute([$fname, $lname, $email, $phone, $gender, $birthdate, $qua, $file_name , $description]);
+            $stmt->execute([$firstName, $lastName, $email, $phone, $gender, $birthdate, $qua, $file_name , $description]);
             
             // if($stmt)
             // {
@@ -203,7 +198,7 @@
             // }
 
             //If successfully inserted data then redirect to this page
-            header("Location: /arpesh/employee-database-practical/index.php");
+            // header("Location: /arpesh/employee-database-practical/index.php");
         }
     }
 
