@@ -1,19 +1,16 @@
 <?php
+
     //include connection
     include "connection.php";
+
     // Start session
     session_start();
+
     //Creating Empty Array
     $validateErrors = array();
 
-    if ( isset( $_POST['submit'] ) )
+    if (isset( $_POST['submit'] ) )
     {
-        echo "<pre>";
-        print_r($_POST);
-        echo "</pre>";
-        echo "<pre>";
-        print_r($_FILES);
-        echo "</pre>";
         //firstname Empty Validation
         if ( empty ( $_POST['firstname'] ) )
         {
@@ -24,6 +21,11 @@
         {
             //Remove whitespaces, slashes and store data
             $fname = stripslashes( trim( $_POST['firstname'] ) );
+            //Check if firstname is well-formed
+            if ( !preg_match("/(^[^s]|\s)/i",$fname) ) 
+            {
+                $validateErrors['firstname_error'] = "Please enter valid name";
+            }
         }
 
         //Lastname Empty Validation
@@ -102,15 +104,15 @@
             $year=$result[0];
             $userDate=$date.'-'.$month.'-'.$year;
             // echo $userDate;
-            $currentDate = new DateTime('today');
-            // echo $currentDate;
-            $interval = $currentDate->diff($userDate);
-            $myage = $interval->y;
+            // $currentDate = new DateTime('today');
+            // // echo $currentDate;
+            // $interval = $currentDate->diff($userDate);
+            // $myage = $interval->y;
 
-            if ( $myage >= 18 )
-            {
-                $validateErrors['birthdate_error'] = "Please enter DOB above 18 Years";
-            }
+            // if ( $myage >= 18 )
+            // {
+            //     $validateErrors['birthdate_error'] = "Please enter DOB above 18 Years";
+            // }
         }
         //Qualification Empty Validation
         if ( empty ( $_POST['qualification'] ) || !isset ( $_POST['qualification'] ) )
@@ -186,7 +188,7 @@
             $_SESSION['file_name'] = $file_name;
             $_SESSION['description'] = $description;
             //Redirect to this page
-            // header("Location: /arpesh/employee-database-practical/addEmployee.php");
+            header("Location: /arpesh/employee-database-practical/addEmployee.php");
         }
         else
         {
@@ -199,9 +201,9 @@
             // {
             //     $_SESSION['insert_data'] = "Data Successfully Inserted";
             // }
-            
+
             //If successfully inserted data then redirect to this page
-            // header("Location: /arpesh/employee-database-practical/index.php");
+            header("Location: /arpesh/employee-database-practical/index.php");
         }
     }
 
